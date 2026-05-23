@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2f8f55" />
+  <meta name="description" content="A Malaysia-friendly OMAD and intermittent fasting quest app with XP, streaks, and a customizable RM20 meal builder." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/icon-192.svg" />
+  <title>OMAD Quest Malaysia</title>
+  <style>
+    :root {
+      --ink: #17211b;
+      --muted: #66736b;
+      --line: #dfe6dc;
+      --paper: #fffdf5;
+      --green: #2f8f55;
+      --green-dark: #1f6d3e;
+      --yellow: #f2b84b;
+      --red: #d95648;
+      --blue: #4077c9;
+      --tile: #f7f3e8;
+      --white: #ffffff;
+      --shadow: 0 14px 34px rgba(23, 33, 27, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        linear-gradient(135deg, rgba(47, 143, 85, 0.12), transparent 34%),
+        linear-gradient(315deg, rgba(242, 184, 75, 0.16), transparent 38%),
+        var(--paper);
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 44px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .logo {
+      display: grid;
+      width: 48px;
+      height: 48px;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      background: var(--yellow);
+      box-shadow: 5px 5px 0 var(--ink);
+      font-weight: 900;
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(1.45rem, 3vw, 2.25rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 0.96rem;
+    }
+
+    .reset {
+      min-height: 42px;
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--ink);
+      padding: 0 14px;
+      cursor: pointer;
+      font-weight: 750;
+      box-shadow: 3px 3px 0 var(--ink);
+    }
+
+    .reset:active, .quest button:active, .meal-btn:active, .day:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 var(--ink);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 20px;
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
+
+    .panel {
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.74);
+      box-shadow: var(--shadow);
+    }
+
+    .stage {
+      padding: 24px;
+      overflow: hidden;
+      position: relative;
+      min-width: 0;
+    }
+
+    .stage::after {
+      content: "";
+      position: absolute;
+      inset: auto -60px -90px auto;
+      width: min(260px, 55%);
+      height: min(260px, 55%);
+      background:
+        radial-gradient(circle at 48% 42%, var(--yellow) 0 18%, transparent 19%),
+        radial-gradient(circle at 68% 40%, var(--green) 0 10%, transparent 11%),
+        radial-gradient(circle at 38% 65%, var(--red) 0 9%, transparent 10%);
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    .rank {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      border: 2px solid var(--ink);
+      border-radius: 999px;
+      padding: 0 12px;
+      background: var(--green);
+      color: var(--white);
+      font-size: 0.82rem;
+      font-weight: 850;
+    }
+
+    .stage h2 {
+      margin-top: 18px;
+      max-width: 640px;
+      font-size: clamp(2.1rem, 6vw, 4.7rem);
+      line-height: 0.95;
+      letter-spacing: 0;
+    }
+
+    .stage p {
+      max-width: 620px;
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.55;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 26px;
+      max-width: 650px;
+    }
+
+    .stat {
+      min-height: 92px;
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      background: var(--tile);
+      padding: 12px;
+      box-shadow: 4px 4px 0 var(--ink);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.75rem;
+      line-height: 1;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .avatar {
+      display: grid;
+      padding: 18px;
+      place-items: center;
+      text-align: center;
+      background: #f1f7ed;
+    }
+
+    .plate {
+      position: relative;
+      width: min(260px, 76vw);
+      aspect-ratio: 1;
+      border: 6px solid var(--ink);
+      border-radius: 50%;
+      background: conic-gradient(var(--green) 0 50%, var(--yellow) 50% 75%, var(--red) 75% 100%);
+      box-shadow: 7px 7px 0 var(--ink);
+    }
+
+    .plate::before {
+      content: "";
+      position: absolute;
+      inset: 18%;
+      border: 5px solid var(--ink);
+      border-radius: 50%;
+      background: var(--paper);
+    }
+
+    .plate-label {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 42px;
+      font-weight: 900;
+      line-height: 1.15;
+      z-index: 1;
+    }
+
+    .avatar p {
+      margin-top: 20px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 20px;
+    }
+
+    .card {
+      padding: 18px;
+    }
+
+    .card h3 {
+      font-size: 1.15rem;
+      margin-bottom: 14px;
+    }
+
+    .days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .day {
+      min-height: 58px;
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      background: var(--white);
+      cursor: pointer;
+      box-shadow: 3px 3px 0 var(--ink);
+      font-weight: 850;
+    }
+
+    .day small {
+      display: block;
+      color: var(--muted);
+      font-weight: 750;
+      margin-top: 2px;
+    }
+
+    .day.active {
+      background: var(--blue);
+      color: var(--white);
+    }
+
+    .day.active small {
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .quest-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .quest {
+      display: grid;
+      grid-template-columns: 46px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      padding: 10px;
+    }
+
+    .quest-icon {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      background: var(--tile);
+      font-size: 1.25rem;
+      font-weight: 900;
+    }
+
+    .quest strong {
+      display: block;
+      font-size: 0.98rem;
+    }
+
+    .quest span {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .quest button, .meal-btn {
+      min-height: 38px;
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      background: var(--white);
+      cursor: pointer;
+      box-shadow: 3px 3px 0 var(--ink);
+      font-weight: 850;
+      padding: 0 12px;
+    }
+
+    .quest.done {
+      border-color: rgba(47, 143, 85, 0.38);
+      background: #eef8f1;
+    }
+
+    .quest.done button {
+      background: var(--green);
+      color: var(--white);
+    }
+
+    .meal-builder {
+      display: grid;
+      gap: 12px;
+    }
+
+    .meal-row {
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      padding: 12px;
+    }
+
+    .meal-row label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 850;
+    }
+
+    .choices {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .meal-btn.selected {
+      background: var(--yellow);
+    }
+
+    .custom-food {
+      display: grid;
+      grid-template-columns: 1fr 82px auto;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .custom-food input {
+      min-width: 0;
+      min-height: 38px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      padding: 0 10px;
+      font-weight: 700;
+    }
+
+    .custom-food input:focus {
+      border-color: var(--green);
+      outline: none;
+    }
+
+    .custom-food button, .remove-food {
+      min-height: 38px;
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      background: var(--green);
+      color: var(--white);
+      cursor: pointer;
+      box-shadow: 3px 3px 0 var(--ink);
+      font-weight: 850;
+      padding: 0 12px;
+    }
+
+    .remove-food {
+      background: var(--white);
+      color: var(--ink);
+      min-width: 38px;
+      padding: 0;
+    }
+
+    .budget {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .bar {
+      height: 18px;
+      border: 2px solid var(--ink);
+      border-radius: 999px;
+      overflow: hidden;
+      background: var(--white);
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--green);
+      transition: width 180ms ease;
+    }
+
+    .result {
+      margin-top: 14px;
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      background: var(--tile);
+      padding: 14px;
+      line-height: 1.45;
+    }
+
+    .result strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .warning {
+      margin-top: 20px;
+      padding: 14px;
+      border: 2px solid rgba(217, 86, 72, 0.35);
+      border-radius: 8px;
+      background: rgba(217, 86, 72, 0.08);
+      color: #753229;
+      line-height: 1.45;
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 880px) {
+      .hero, .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .days {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .app {
+        width: min(100% - 20px, 1180px);
+        padding-top: 16px;
+      }
+
+      .stage, .card {
+        padding: 14px;
+      }
+
+      .quest {
+        grid-template-columns: 40px 1fr;
+      }
+
+      .quest button {
+        grid-column: 1 / -1;
+      }
+
+      .custom-food {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">OF</div>
+        <div>
+          <h1>OMAD Fasting Quest</h1>
+          <p class="subtitle">Malaysia budget diet game for one focused player.</p>
+        </div>
+      </div>
+      <button class="reset" id="resetBtn">Reset Quest</button>
+    </header>
+
+    <section class="hero">
+      <div class="panel stage">
+        <span class="rank" id="rank">Rookie Faster</span>
+        <h2>Build discipline without making food boring.</h2>
+        <p>
+          Complete daily fasting quests, build one strong Malaysia-style meal, and keep the day under RM20.
+          Your goal is progress, not punishment.
+        </p>
+        <div class="stats">
+          <div class="stat">
+            <strong id="xp">0</strong>
+            <span>XP earned</span>
+          </div>
+          <div class="stat">
+            <strong id="streak">0</strong>
+            <span>day streak</span>
+          </div>
+          <div class="stat">
+            <strong id="coins">RM20</strong>
+            <span>daily food limit</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="panel avatar">
+        <div class="plate">
+          <div class="plate-label">1/2 veg<br>1/4 protein<br>1/4 carbs</div>
+        </div>
+        <p>Win the day with one complete plate: protein, vegetables, smart carbs, water, and no sweet drink during fasting.</p>
+      </aside>
+    </section>
+
+    <section class="grid">
+      <div class="panel card">
+        <h3>Choose Today’s Level</h3>
+        <div class="days" id="days"></div>
+        <div class="quest-list" id="quests"></div>
+      </div>
+
+      <div class="panel card">
+        <h3>Build Your One Meal</h3>
+        <div class="meal-builder" id="mealBuilder"></div>
+        <div class="budget">
+          <div class="bar">
+            <div class="bar-fill" id="budgetFill"></div>
+          </div>
+          <p class="subtitle" id="budgetText">Current meal: RM0 / RM20</p>
+        </div>
+        <div class="result" id="mealResult">
+          <strong>Your plate is waiting.</strong>
+          Pick protein, vegetables, carbs, and one flavor upgrade.
+        </div>
+        <div class="warning">
+          If you feel dizzy, shaky, faint, or unwell, break the fast with a simple meal. Avoid OMAD if you have diabetes, are underweight, pregnant, or have a history of eating disorders unless a clinician says it is okay.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const days = [
+      { name: "Mon", level: "16:8", title: "Warm Up" },
+      { name: "Tue", level: "18:6", title: "Discipline" },
+      { name: "Wed", level: "20:4", title: "Boss Mode" },
+      { name: "Thu", level: "18:6", title: "Control" },
+      { name: "Fri", level: "OMAD", title: "One Plate" },
+      { name: "Sat", level: "16:8", title: "Social" },
+      { name: "Sun", level: "OMAD", title: "Reset" }
+    ];
+
+    const baseQuests = [
+      { id: "water", icon: "W", name: "Water Shield", detail: "Plain water, kopi o kosong, or teh o kosong.", xp: 10 },
+      { id: "fast", icon: "F", name: "Finish Fast", detail: "Complete the selected fasting window.", xp: 25 },
+      { id: "protein", icon: "P", name: "Protein Lock", detail: "Eggs, chicken, fish, tofu, tempeh, dhal, or tuna.", xp: 20 },
+      { id: "veg", icon: "V", name: "Two Veg Combo", detail: "Add at least two vegetables to the meal.", xp: 20 },
+      { id: "budget", icon: "$", name: "RM20 Limit", detail: "Keep today’s food under RM20.", xp: 15 }
+    ];
+
+    const mealGroups = [
+      {
+        key: "protein",
+        label: "Protein",
+        items: [
+          { name: "2 eggs", cost: 3 },
+          { name: "chicken", cost: 7 },
+          { name: "tofu", cost: 3 },
+          { name: "tempeh", cost: 4 },
+          { name: "sardine", cost: 5 },
+          { name: "dhal", cost: 4 }
+        ]
+      },
+      {
+        key: "veg",
+        label: "Vegetables",
+        items: [
+          { name: "kangkung", cost: 2 },
+          { name: "sawi", cost: 2 },
+          { name: "cabbage", cost: 2 },
+          { name: "cucumber", cost: 1 },
+          { name: "carrot", cost: 1 }
+        ]
+      },
+      {
+        key: "carb",
+        label: "Smart Carb",
+        items: [
+          { name: "rice", cost: 2 },
+          { name: "potato", cost: 3 },
+          { name: "chapati", cost: 3 },
+          { name: "oats", cost: 2 }
+        ]
+      },
+      {
+        key: "flavor",
+        label: "Flavor Upgrade",
+        items: [
+          { name: "sambal", cost: 1 },
+          { name: "black pepper", cost: 1 },
+          { name: "curry spice", cost: 1 },
+          { name: "lime chili", cost: 1 }
+        ]
+      }
+    ];
+
+    const state = JSON.parse(localStorage.getItem("omadQuestState")) || {
+      selectedDay: 0,
+      done: {},
+      meal: {},
+      customItems: {}
+    };
+
+    state.customItems ||= {};
+
+    const save = () => localStorage.setItem("omadQuestState", JSON.stringify(state));
+
+    function dayKey() {
+      return days[state.selectedDay].name;
+    }
+
+    function currentDone() {
+      state.done[dayKey()] ||= {};
+      return state.done[dayKey()];
+    }
+
+    function mealKey() {
+      state.meal[dayKey()] ||= {};
+      return state.meal[dayKey()];
+    }
+
+    function customItemsFor(groupKey) {
+      state.customItems[groupKey] ||= [];
+      return state.customItems[groupKey];
+    }
+
+    function allItems(group) {
+      return [...group.items, ...customItemsFor(group.key).map((item) => ({ ...item, custom: true }))];
+    }
+
+    function totalXp() {
+      return Object.values(state.done).reduce((sum, doneSet) => {
+        return sum + baseQuests.reduce((daySum, quest) => daySum + (doneSet[quest.id] ? quest.xp : 0), 0);
+      }, 0);
+    }
+
+    function streakCount() {
+      let streak = 0;
+      for (const day of days) {
+        const doneSet = state.done[day.name] || {};
+        const completed = baseQuests.every((quest) => doneSet[quest.id]);
+        if (completed) streak += 1;
+      }
+      return streak;
+    }
+
+    function rankName(xp) {
+      if (xp >= 450) return "Legend Faster";
+      if (xp >= 300) return "Boss Mode";
+      if (xp >= 180) return "Meal Prep Warrior";
+      if (xp >= 80) return "Discipline Builder";
+      return "Rookie Faster";
+    }
+
+    function renderStats() {
+      const xp = totalXp();
+      document.getElementById("xp").textContent = xp;
+      document.getElementById("streak").textContent = streakCount();
+      document.getElementById("rank").textContent = rankName(xp);
+    }
+
+    function renderDays() {
+      const daysEl = document.getElementById("days");
+      daysEl.innerHTML = "";
+      days.forEach((day, index) => {
+        const button = document.createElement("button");
+        button.className = `day${index === state.selectedDay ? " active" : ""}`;
+        button.innerHTML = `${day.name}<small>${day.level}</small>`;
+        button.title = day.title;
+        button.addEventListener("click", () => {
+          state.selectedDay = index;
+          save();
+          render();
+        });
+        daysEl.appendChild(button);
+      });
+    }
+
+    function renderQuests() {
+      const questsEl = document.getElementById("quests");
+      const doneSet = currentDone();
+      questsEl.innerHTML = "";
+      baseQuests.forEach((quest) => {
+        const item = document.createElement("div");
+        const isDone = !!doneSet[quest.id];
+        item.className = `quest${isDone ? " done" : ""}`;
+        item.innerHTML = `
+          <div class="quest-icon">${quest.icon}</div>
+          <div>
+            <strong>${quest.name}</strong>
+            <span>${quest.detail} +${quest.xp} XP</span>
+          </div>
+          <button>${isDone ? "Done" : "Claim"}</button>
+        `;
+        item.querySelector("button").addEventListener("click", () => {
+          doneSet[quest.id] = !doneSet[quest.id];
+          save();
+          render();
+        });
+        questsEl.appendChild(item);
+      });
+    }
+
+    function mealCost(selected) {
+      return mealGroups.reduce((sum, group) => {
+        const chosen = allItems(group).find((item) => item.name === selected[group.key]);
+        return sum + (chosen ? chosen.cost : 0);
+      }, 0);
+    }
+
+    function renderMealBuilder() {
+      const builder = document.getElementById("mealBuilder");
+      const selected = mealKey();
+      builder.innerHTML = "";
+      mealGroups.forEach((group) => {
+        const row = document.createElement("div");
+        row.className = "meal-row";
+        row.innerHTML = `
+          <label>${group.label}</label>
+          <div class="choices"></div>
+          <form class="custom-food" data-group="${group.key}">
+            <input name="food" type="text" maxlength="28" placeholder="Your food" aria-label="${group.label} custom food" />
+            <input name="cost" type="number" min="0" max="99" step="1" placeholder="RM" aria-label="${group.label} price" />
+            <button type="submit">Add</button>
+          </form>
+        `;
+        const choices = row.querySelector(".choices");
+        allItems(group).forEach((item) => {
+          const button = document.createElement("button");
+          button.className = `meal-btn${selected[group.key] === item.name ? " selected" : ""}`;
+          button.textContent = `${item.name} RM${item.cost}`;
+          button.addEventListener("click", () => {
+            selected[group.key] = selected[group.key] === item.name ? "" : item.name;
+            save();
+            render();
+          });
+          choices.appendChild(button);
+
+          if (item.custom) {
+            const remove = document.createElement("button");
+            remove.className = "remove-food";
+            remove.type = "button";
+            remove.textContent = "x";
+            remove.title = `Remove ${item.name}`;
+            remove.addEventListener("click", () => {
+              state.customItems[group.key] = customItemsFor(group.key).filter((custom) => custom.name !== item.name);
+              if (selected[group.key] === item.name) selected[group.key] = "";
+              save();
+              render();
+            });
+            choices.appendChild(remove);
+          }
+        });
+
+        row.querySelector("form").addEventListener("submit", (event) => {
+          event.preventDefault();
+          const form = event.currentTarget;
+          const food = form.food.value.trim().replace(/\s+/g, " ");
+          const cost = Math.max(0, Math.min(99, Math.round(Number(form.cost.value))));
+          if (!food || Number.isNaN(cost)) return;
+          const customItems = customItemsFor(group.key);
+          const existing = customItems.find((item) => item.name.toLowerCase() === food.toLowerCase());
+          if (existing) {
+            existing.cost = cost;
+          } else {
+            customItems.push({ name: food, cost });
+          }
+          selected[group.key] = food;
+          save();
+          render();
+        });
+
+        builder.appendChild(row);
+      });
+    }
+
+    function renderBudget() {
+      const selected = mealKey();
+      const cost = mealCost(selected);
+      const percent = Math.min((cost / 20) * 100, 100);
+      const fill = document.getElementById("budgetFill");
+      fill.style.width = `${percent}%`;
+      fill.style.background = cost > 20 ? "var(--red)" : cost >= 16 ? "var(--yellow)" : "var(--green)";
+      document.getElementById("budgetText").textContent = `Current meal: RM${cost} / RM20`;
+
+      const parts = ["protein", "veg", "carb", "flavor"].map((key) => selected[key]).filter(Boolean);
+      const result = document.getElementById("mealResult");
+      if (parts.length === 0) {
+        result.innerHTML = "<strong>Your plate is waiting.</strong>Pick protein, vegetables, carbs, and one flavor upgrade.";
+        return;
+      }
+
+      const complete = ["protein", "veg", "carb", "flavor"].every((key) => selected[key]);
+      const verdict = cost > 20
+        ? "Over budget. Swap chicken for eggs, tofu, tempeh, or dhal."
+        : complete
+          ? "Quest-ready meal. Strong, simple, and still within budget."
+          : "Good start. Complete every food slot to make it OMAD-ready.";
+
+      result.innerHTML = "";
+      const meal = document.createElement("strong");
+      meal.textContent = parts.join(" + ");
+      result.append(meal, verdict);
+    }
+
+    function render() {
+      renderStats();
+      renderDays();
+      renderQuests();
+      renderMealBuilder();
+      renderBudget();
+    }
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      localStorage.removeItem("omadQuestState");
+      state.selectedDay = 0;
+      state.done = {};
+      state.meal = {};
+      state.customItems = {};
+      render();
+    });
+
+    render();
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js");
+      });
+    }
+  </script>
+</body>
+</html>

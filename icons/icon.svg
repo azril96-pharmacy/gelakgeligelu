@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="OMAD Quest icon">
+  <rect width="512" height="512" rx="88" fill="#fffdf5"/>
+  <rect x="54" y="54" width="404" height="404" rx="70" fill="#f2b84b" stroke="#17211b" stroke-width="20"/>
+  <circle cx="256" cy="256" r="132" fill="#fffdf5" stroke="#17211b" stroke-width="18"/>
+  <path d="M256 124a132 132 0 0 1 132 132H256z" fill="#2f8f55"/>
+  <path d="M388 256a132 132 0 0 1-132 132V256z" fill="#d95648"/>
+  <path d="M256 388a132 132 0 0 1 0-264v132z" fill="#4077c9"/>
+  <circle cx="256" cy="256" r="48" fill="#fffdf5" stroke="#17211b" stroke-width="14"/>
+  <text x="256" y="276" text-anchor="middle" fill="#17211b" font-family="Arial, sans-serif" font-size="54" font-weight="900">OF</text>
+</svg>
